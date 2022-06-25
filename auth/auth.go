@@ -15,6 +15,57 @@ func (c *Client) url(endpoint string) string {
 	)
 }
 
+type SignUpRequest struct {
+	Email             string `json:"email"`
+	Password          string `json:"password"`
+	ReturnSecureToken bool   `json:"returnSecuretoken"`
+}
+
+type SignUpResponse struct {
+	IdToken      string `json:"idToken"`
+	Email        string `json:"email"`
+	RefreshToken string `json:"refreshToken"`
+	ExpiresIn    string `json:"expiresIn"`
+	LocalId      string `json:"localId"`
+	Kind         string `json:"kind"`
+}
+
+func (c *Client) SignUp(
+	email string,
+	password string,
+	returnSecureToken bool,
+) (*SignUpResponse, error) {
+	payload := SignUpRequest{
+		Email:             email,
+		Password:          password,
+		ReturnSecureToken: returnSecureToken,
+	}
+
+	jsonData, err := json.Marshal(payload)
+
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest(
+		http.MethodPost,
+		c.url("accounts:signUp"),
+		bytes.NewBuffer(jsonData),
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var fullResponse SignUpResponse
+
+	if err := c.sendRequest(req, &fullResponse); err != nil {
+		return nil, err
+	}
+
+	return &fullResponse, nil
+}
+
 type SignInWithEmailAndPasswordRequest struct {
 	Email             string `json:"email"`
 	Password          string `json:"password"`
@@ -22,12 +73,12 @@ type SignInWithEmailAndPasswordRequest struct {
 }
 
 type SignInWithEmailAndPasswordResponse struct {
-	IdToken      string `json:"idToken"`
-	Email        string `json:"email"`
-	RefreshToken string `json:"refreshToken"`
-	ExpiresIn    string `json:"expiresIn"`
-	LocalId      string `json:"localId"`
-	Registered   bool   `json:"registered"`
+	IdToken     string `json:"idToken"`
+	Email       string `json:"email"`
+	LocalId     string `json:"localId"`
+	DisplayName string `json:"displayName"`
+	Registered  bool   `json:"registered"`
+	Kind        string `json:"kind"`
 }
 
 func (c *Client) SignInWithPassword(
