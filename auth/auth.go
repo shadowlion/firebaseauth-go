@@ -116,3 +116,35 @@ func (c *Client) SignInWithPassword(
 
 	return &fullResponse, nil
 }
+
+type DeleteAccountRequest struct {
+	IdToken string `json:"idToken"`
+}
+
+func (c *Client) DeleteAccount(idToken string) error {
+	payload := DeleteAccountRequest{
+		IdToken: idToken,
+	}
+
+	jsonData, err := json.Marshal(payload)
+
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest(
+		http.MethodPost,
+		c.url("accounts:delete"),
+		bytes.NewBuffer(jsonData),
+	)
+
+	if err != nil {
+		return err
+	}
+
+	if err := c.sendRequest(req, nil); err != nil {
+		return err
+	}
+
+	return nil
+}
