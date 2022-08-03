@@ -7,12 +7,51 @@ import (
 	"net/http"
 )
 
-func (c *Client) url(endpoint string) string {
-	return fmt.Sprintf(
+type SignUpWithCustomTokenRequest struct {
+	Token             string `json:"token"`
+	ReturnSecureToken bool   `json:"returnSecureToken"`
+}
+
+type SignUpWithCustomTokenResponse struct {
+	IdToken      string `json:"idToken"`
+	RefreshToken string `json:"refreshToken"`
+	ExpiresIn    string `json:"expiresIn"`
+}
+
+func (c *Client) SignUpWithCustomToken(
+	token string,
+	returnSecureToken bool,
+) (*SignUpWithCustomTokenResponse, error) {
+	payload := SignUpWithCustomTokenRequest{
+		Token:             token,
+		ReturnSecureToken: returnSecureToken,
+	}
+
+	jsonData, err := json.Marshal(payload)
+
+	if err != nil {
+		return nil, err
+	}
+
+	endpoint := "accounts:signInWithCustomToken"
+	url := fmt.Sprintf(
 		"https://identitytoolkit.googleapis.com/v1/%s?key=%s",
 		endpoint,
 		c.ApiKey,
 	)
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonData))
+
+	if err != nil {
+		return nil, err
+	}
+
+	var fullResponse SignUpWithCustomTokenResponse
+
+	if err := c.sendRequest(req, &fullResponse); err != nil {
+		return nil, err
+	}
+
+	return &fullResponse, nil
 }
 
 type SignUpRequest struct {
@@ -47,11 +86,13 @@ func (c *Client) SignUp(
 		return nil, err
 	}
 
-	req, err := http.NewRequest(
-		http.MethodPost,
-		c.url("accounts:signUp"),
-		bytes.NewBuffer(jsonData),
+	endpoint := "accounts:signUp"
+	url := fmt.Sprintf(
+		"https://identitytoolkit.googleapis.com/v1/%s?key=%s",
+		endpoint,
+		c.ApiKey,
 	)
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonData))
 
 	if err != nil {
 		return nil, err
@@ -98,11 +139,13 @@ func (c *Client) SignInWithPassword(
 		return nil, err
 	}
 
-	req, err := http.NewRequest(
-		http.MethodPost,
-		c.url("accounts:signInWithPassword"),
-		bytes.NewBuffer(jsonData),
+	endpoint := "accounts:signInWithPassword"
+	url := fmt.Sprintf(
+		"https://identitytoolkit.googleapis.com/v1/%s?key=%s",
+		endpoint,
+		c.ApiKey,
 	)
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonData))
 
 	if err != nil {
 		return nil, err
@@ -132,11 +175,13 @@ func (c *Client) DeleteAccount(idToken string) error {
 		return err
 	}
 
-	req, err := http.NewRequest(
-		http.MethodPost,
-		c.url("accounts:delete"),
-		bytes.NewBuffer(jsonData),
+	endpoint := "accounts:delete"
+	url := fmt.Sprintf(
+		"https://identitytoolkit.googleapis.com/v1/%s?key=%s",
+		endpoint,
+		c.ApiKey,
 	)
+	req, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(jsonData))
 
 	if err != nil {
 		return err

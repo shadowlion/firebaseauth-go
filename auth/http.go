@@ -25,14 +25,14 @@ type ErrorItem struct {
 	Message string `json:"message"`
 }
 
-type ErrorPayload struct {
+type ErrorDetails struct {
 	Errors  []ErrorItem `json:"errors"`
 	Code    string      `json:"code"`
 	Message string      `json:"message"`
 }
 
 type ErrorResponse struct {
-	Error ErrorPayload `json:"error"`
+	Error ErrorDetails `json:"error"`
 }
 
 func (c *Client) sendRequest(req *http.Request, v interface{}) error {
